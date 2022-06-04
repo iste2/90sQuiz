@@ -1,0 +1,27 @@
+@page "/login"
+@using Microsoft.AspNetCore.Components
+@using Quiz90s.GameData
+
+@if(_player != null) 
+{
+    <h3>Login</h3>
+
+    <MudTextField @bind-Value="_player.Name"></MudTextField>
+}
+
+
+@code {
+
+    private Player _player;
+    private HubConnection _hubConnection;
+
+    protected override Task OnInitializedAsync()
+    {
+        _player = new Player();
+
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/login"))
+
+    }
+
+}
