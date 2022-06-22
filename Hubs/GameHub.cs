@@ -12,15 +12,25 @@ namespace Quiz90s.Hubs
             await Clients.All.SendAsync("ReceiveMessage", user, message);
         }
 
-        public async Task JoinGame(Player player, string gameId) 
+        public async Task JoinGame(Player player, string? gameId) 
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
-            if (!_games.TryGetValue(gameId, out var hGame))
+            Console.WriteLine(player.Name);
+            Console.WriteLine(gameId);
+
+            if (!string.IsNullOrEmpty(gameId) && !_games.ContainsKey(gameId))
             {
-                hGame = new Game(gameId);
-                _games.Add(gameId, hGame);
+                await Clients.Client(Context.ConnectionId).SendAsync("Game does not exist");
+                return;
             }
-            hGame.AddPlayer(player);
+
+            if (string.IsNullOrEmpty(gameId))
+            {
+                gameId = new Guid().ToString();
+                _games.Add(gameId, new Game(gameId, Groups, Clients.Group(gameId)));
+            }
+            
+            _games[gameId].AddPlayer(player, Context.ConnectionId);
+            await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
         }
 
         public async Task LeaveGame(string userId, string gameId)

@@ -1,27 +1,61 @@
-@page "/login"
+@page "/login/{GameId}"
 @using Microsoft.AspNetCore.Components
 @using Quiz90s.GameData
+@using Microsoft.AspNetCore.SignalR.Client
+@using Quiz90s.Hubs
+@inject NavigationManager NavigationManager
 
-@if(_player != null) 
+@if(_hubConnection != null) 
 {
-    <h3>Login</h3>
+    <h3>Quis90s</h3>
 
     <MudTextField @bind-Value="_player.Name"></MudTextField>
+    <MudTextField @bind-Value="GameId"></MudTextField>
+    <MudButton @onclick="Connect">Verbinden</MudButton>
+    <MudText>@StatusDisplayText</MudText>
+}
+else
+{
+    <MudText>Lädt</MudText>
 }
 
 
 @code {
 
-    private Player _player;
-    private HubConnection _hubConnection;
+    private Player _player = new Player();
+    private HubConnection? _hubConnection;
+    
+    [ParameterAttribute]
+    public string? GameId { get; set; }
+    
+    public string StatusDisplayText { get; set; }
+    
+    public string ConnectDisplayText => GameId != null ? "Spiel beitreten" : "Neues Spiel starten";
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        _player = new Player();
-
         _hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri("/login"))
+            .WithUrl(NavigationManager.ToAbsoluteUri("/gamehub"))
+            .Build();
 
+        _hubConnection.On(Actions.JoinGameSuccess.ToString(), (Player player) =>
+        {
+            Console.WriteLine("received success");
+            StatusDisplayText = $"{player.Name} verbunden.";
+            StateHasChanged();
+        });
+
+        await _hubConnection.StartAsync();
     }
+
+    public async void Connect()
+    {
+        if (_hubConnection == null) 
+            return;
+
+        await _hubConnection.SendAsync(Actions.JoinGame.ToString(), _player, GameId);
+    }
+
+    
 
 }
