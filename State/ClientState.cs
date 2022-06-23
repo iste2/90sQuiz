@@ -8,6 +8,7 @@ namespace Quiz90s.State
     {
         private HubConnection? _hubConnection;
         private Player _player = new Player();
+        private Game _game;
         public event Action? OnChange;
 
         public HubConnection? HubConnection
@@ -26,6 +27,16 @@ namespace Quiz90s.State
             set
             {
                 _player = value;
+                NotifyStateChanged();
+            }
+        }
+
+        public Game Game
+        {
+            get => _game;
+            set
+            {
+                _game = value;
                 NotifyStateChanged();
             }
         }

@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @using Quiz90s.Hubs
 @using Quiz90s.State
+@using Quiz90s.Views
 
 @implements IDisposable
 
@@ -15,32 +16,9 @@
     <div class="mb-6" style="width: 100%;display: flex;justify-content: center;">
         <h1 class="mb-2">Quiz90s</h1>
     </div>
-    <div class="mb-6" style="width: 100%;display: flex;justify-content: center;">
-
-        <MudCarousel TData="string" Style="height: 200px; width: 350px; margin-left: auto; margin-right: auto; display: block;" ShowBullets="false" AutoCycle="false">
-            @foreach (var hImage in Resources.ProfileImages)
-            {
-                <MudCarouselItem Transition="Transition.None">
-                    <div style="height:100%; width: 100%;display: flex;justify-content: center;">
-                        <MudAvatar Class="" Image="@hImage" Style="height:200px; width:200px;"/>
-                    </div>
-                </MudCarouselItem>
-            }
-        </MudCarousel>
-    </div>
-    <div style="width: 100%;display: flex;justify-content: center;">
-        <div style="width: 500px;">
-            <MudTextField Class="mb-4" @bind-Value="ClientState.Player.Name" Label="Name" Variant="Variant.Outlined"></MudTextField>
-            <MudTextField Class="mb-4" @bind-Value="GameId" Label="Spiel-ID" Variant="Variant.Outlined"></MudTextField>
-            <MudButton @onclick="Connect" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large">@ConnectDisplayText</MudButton>
-        </div>
-    </div>
     
+    <LoginComponent />
    
-    
-
-    
-    
 }
 else
 {
@@ -50,43 +28,32 @@ else
 
 @code {
 
-    public string GameId { get; set; }
-    
-    public string StatusDisplayText { get; set; }
-    
-    public string ConnectDisplayText => !string.IsNullOrEmpty(GameId) ? "Spiel beitreten" : "Neues Spiel starten";
-
     protected override async Task OnInitializedAsync()
     {
         ClientState.HubConnection = new HubConnectionBuilder()
             .WithUrl(NavigationManager.ToAbsoluteUri("/gamehub"))
             .Build();
 
-        ClientState.HubConnection.On(Actions.JoinGameSuccess.ToString(), (Player player) =>
+        ClientState.HubConnection.On(Actions.JoinGameSuccess.ToString(), (String message) =>
         {
-            Console.WriteLine("received success");
-            StatusDisplayText = $"{player.Name} verbunden.";
+            Console.WriteLine(message);
+            StateHasChanged();
+        });
+
+        ClientState.HubConnection.On(Actions.JoinGameFail.ToString(), (String message) =>
+        {
+            Console.WriteLine(message);
             StateHasChanged();
         });
 
         await ClientState.HubConnection.StartAsync();
-        StatusDisplayText = ClientState.HubConnection.State.ToString();
-        StateHasChanged();
     }
 
     protected override void OnInitialized()
     {
         ClientState.OnChange += StateHasChanged;
     }
-
-    public async void Connect()
-    {
-        if (ClientState.HubConnection == null) 
-            return;
-        await ClientState.HubConnection.SendAsync(Actions.JoinGame.ToString(), ClientState.Player, GameId);
-    }
-
-
+    
     public void Dispose()
     {
         ClientState.OnChange -= StateHasChanged;

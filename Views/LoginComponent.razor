@@ -1,0 +1,41 @@
+﻿@using Quiz90s.State
+@using Quiz90s.GameData
+@using Quiz90s.Hubs
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.SignalR.Client
+@inject ClientState ClientState
+
+<div class="mb-6" style="width: 100%;display: flex;justify-content: center;">
+
+    <MudCarousel TData="string" Style="height: 200px; width: 350px; margin-left: auto; margin-right: auto; display: block;" ShowBullets="false" AutoCycle="false">
+        @foreach (var hImage in Resources.ProfileImages)
+        {
+            <MudCarouselItem Transition="Transition.None">
+                <div style="height:100%; width: 100%;display: flex;justify-content: center;">
+                    <MudAvatar Class="" Image="@hImage" Style="height:200px; width:200px;"/>
+                </div>
+            </MudCarouselItem>
+        }
+    </MudCarousel>
+</div>
+<div style="width: 100%;display: flex;justify-content: center;">
+    <div style="width: 500px;">
+        <MudTextField Class="mb-4" @bind-Value="ClientState.Player.Name" Immediate="true" Label="Name" Variant="Variant.Outlined"></MudTextField>
+        <MudTextField Class="mb-4" @bind-Value="GameId" Immediate="true" Label="Spiel-ID" HelperText="Freilassen, um ein neues Spiel zu eröffnen." Variant="Variant.Outlined"></MudTextField>
+        <MudButton @onclick="Connect" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Disabled="@(string.IsNullOrEmpty(ClientState.Player.Name))">@ConnectDisplayText</MudButton>
+    </div>
+</div>
+
+@code {
+    
+    public string GameId { get; set; }
+    public string ConnectDisplayText => !string.IsNullOrEmpty(GameId) ? "Spiel beitreten" : "Neues Spiel starten";
+    
+    public async void Connect()
+    {
+        if (ClientState.HubConnection == null) 
+            return;
+        await ClientState.HubConnection.SendAsync(Actions.JoinGame.ToString(), ClientState.Player, GameId);
+    }
+    
+}
