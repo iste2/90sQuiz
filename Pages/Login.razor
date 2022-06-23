@@ -1,4 +1,4 @@
-@page "/{GameId}"
+@page "/"
 @using Microsoft.AspNetCore.Components
 @using Quiz90s.GameData
 @using Microsoft.AspNetCore.SignalR.Client
@@ -12,15 +12,25 @@
 
 @if(ClientState.HubConnection != null) 
 {
-    @if (string.IsNullOrEmpty(ClientState.Player.Name) || string.IsNullOrEmpty(GameId))
-    {
-        <h3>Quis90s</h3>
+    
+    <h3>Quis90s</h3>
+    <MudContainer Class="justify-center">
+         <MudCarousel ItemsSource="@Resources.ProfileImages" Style="height: 200px; width: 300px; margin-left: auto; margin-right: auto;" ShowBullets="false" AutoCycle="false">
+            <ItemTemplate>
+                <div class="d-flex flex-column flex-column justify-center" style="height:100%; width: 100%;">
+                    <MudAvatar Class="" Image="@context" Style="height:200px; width:200px;align-self: center;"/>
+                </div>
+            </ItemTemplate>
+        </MudCarousel>
+    </MudContainer>
+   
+    
 
-        <MudTextField @bind-Value="ClientState.Player.Name"></MudTextField>
-        <MudTextField @bind-Value="GameId"></MudTextField>
-        <MudButton @onclick="Connect">@ConnectDisplayText</MudButton>
-        <MudText>@StatusDisplayText</MudText>
-    }
+    <MudTextField @bind-Value="ClientState.Player.Name"></MudTextField>
+    <MudTextField @bind-Value="GameId"></MudTextField>
+    <MudButton @onclick="Connect">@ConnectDisplayText</MudButton>
+    <MudText>@StatusDisplayText</MudText>
+    
 }
 else
 {
@@ -30,7 +40,6 @@ else
 
 @code {
 
-    [Parameter]
     public string GameId { get; set; }
     
     public string StatusDisplayText { get; set; }
@@ -51,6 +60,8 @@ else
         });
 
         await ClientState.HubConnection.StartAsync();
+        StatusDisplayText = ClientState.HubConnection.State.ToString();
+        StateHasChanged();
     }
 
     protected override void OnInitialized()
@@ -60,7 +71,6 @@ else
 
     public async void Connect()
     {
-        Console.WriteLine("Connect");
         if (ClientState.HubConnection == null) 
             return;
         await ClientState.HubConnection.SendAsync(Actions.JoinGame.ToString(), ClientState.Player, GameId);

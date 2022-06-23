@@ -30,6 +30,7 @@ namespace Quiz90s.Hubs
             {
                 gameId = new Guid().ToString();
                 _games.Add(gameId, new Game(gameId, Groups, Clients.Group(gameId)));
+                Console.WriteLine("Created game " + gameId);
             }
             
             _games[gameId].AddPlayer(player, Context.ConnectionId);
