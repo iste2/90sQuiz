@@ -1,7 +1,11 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using MudBlazor.Services;
 using Quiz90s.Hubs;
+using Quiz90s.State;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
+builder.Services.AddScoped<ClientState>();
 
 var app = builder.Build();
 
