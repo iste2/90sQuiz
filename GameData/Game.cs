@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.AspNetCore.SignalR;
 using Quiz90s.Hubs;
 

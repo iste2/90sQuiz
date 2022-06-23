@@ -1,6 +1,8 @@
-namespace Quiz90s.Hubs;
-
-public enum Actions
+namespace Quiz90s.Hubs
 {
-    JoinGame, JoinGameSuccess
+    public enum Actions
+    {
+        JoinGame, JoinGameSuccess
+    }
 }
+
